@@ -31,12 +31,18 @@ class Settings(BaseSettings):
     # Redis
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
+    REDIS_PASSWORD: str = ""
     
     # JWT Authentication
     JWT_SECRET_KEY: str = "change_me_super_secret_key_in_production"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    
+    # Initial Superuser (for seeding)
+    INITIAL_SUPERUSER_EMAIL: str = "admin@jerp.local"
+    INITIAL_SUPERUSER_PASSWORD: str = "admin123"
+    INITIAL_SUPERUSER_NAME: str = "System Administrator"
     
     class Config:
         env_file = ".env"

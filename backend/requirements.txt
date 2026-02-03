@@ -11,6 +11,7 @@ email-validator==2.1.0
 sqlalchemy==2.0.23
 pymysql==1.1.1  # Fixed: SQL Injection vulnerability (was 1.1.0)
 cryptography==44.0.1  # Fixed: NULL pointer dereference and Bleichenbacher timing oracle (was 41.0.7)
+alembic==1.13.1
 
 # Authentication & Security
 python-jose[cryptography]==3.3.0
@@ -19,6 +20,7 @@ python-multipart==0.0.22  # Fixed: Multiple vulnerabilities including arbitrary 
 
 # Utilities
 python-dateutil==2.8.2
+click==8.1.7
 
 # Testing
 pytest==7.4.3

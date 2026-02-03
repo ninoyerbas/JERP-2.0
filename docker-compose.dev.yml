@@ -1,0 +1,33 @@
+version: '3.8'
+
+# Development overrides for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      APP_DEBUG: "true"
+      APP_ENV: development
+    volumes:
+      # Enable hot reload by mounting source code as read-write
+      - ./backend:/app/backend:rw
+      - ./backend/alembic:/app/alembic:rw
+      - ./backend/alembic.ini:/app/alembic.ini:ro
+    ports:
+      - "8000:8000"
+      - "5678:5678"  # Debug port for remote debugging
+
+  mysql:
+    ports:
+      - "3306:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --general-log=1 --general-log-file=/var/log/mysql/general.log
+
+  redis:
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --appendfsync everysec

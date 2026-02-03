@@ -73,20 +73,142 @@ JERP 2.0 includes a comprehensive compliance framework that automatically monito
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- **Windows 11** (or Windows 10 with WSL 2)
+- **Docker Desktop for Windows** - [Download](https://www.docker.com/products/docker-desktop/)
+- **Git** - [Download](https://git-scm.com/download/win)
+
+### Installation
+
+#### 1. Clone and Configure
+
 ```bash
-# Clone the repository
 git clone https://github.com/ninoyerbas/JERP-2.0.git
 cd JERP-2.0
-
-# Configure environment
 cp .env.example .env
-# Edit .env with your settings
+# Edit .env with your settings (see below)
+```
 
+**Important:** Update these values in `.env`:
+```env
+MYSQL_ROOT_PASSWORD=your_secure_root_password
+MYSQL_PASSWORD=your_secure_password
+JWT_SECRET_KEY=your_very_long_random_secret_key_at_least_32_chars
+INITIAL_SUPERUSER_EMAIL=admin@jerp.local
+INITIAL_SUPERUSER_PASSWORD=admin123  # Change in production!
+```
+
+#### 2. Start with Docker Compose
+
+**Option A: Using PowerShell Scripts (Windows - Recommended)**
+```powershell
+# Start all services
+.\scripts\start.ps1
+
+# View logs
+.\scripts\logs.ps1
+
+# Stop services
+.\scripts\stop.ps1
+
+# Reset database (development)
+.\scripts\reset.ps1
+```
+
+**Option B: Using Docker Compose Directly**
+```bash
+# Start all services (MySQL, Redis, Backend)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+#### 3. Verify Installation
+
+```bash
+# Check service health
+docker-compose ps
+
+# All services should show as "healthy"
+# Access API health check
+curl http://localhost:8000/health
+```
+
+#### 4. Access Application
+
+- **Backend API:** http://localhost:8000
+- **API Documentation (Swagger):** http://localhost:8000/api/v1/docs
+- **API Documentation (ReDoc):** http://localhost:8000/api/v1/redoc
+
+**Default Admin Credentials:**
+- Email: `admin@jerp.local`
+- Password: `admin123` (configurable in `.env`)
+
+### Development Setup
+
+For development with hot reload:
+
+```bash
+# Start with development configuration
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# Code changes in backend/ will automatically reload
+```
+
+### Database Management
+
+```bash
+# Run migrations
+docker-compose exec backend alembic upgrade head
+
+# Create superuser interactively
+docker-compose exec backend python manage.py user:create-superuser
+
+# View migration status
+docker-compose exec backend python manage.py db:status
+
+# Access MySQL shell
+docker-compose exec mysql mysql -u jerp_user -p jerp
+```
+
+### Docker Services
+
+The application consists of three services:
+
+| Service | Description | Port | Health Check |
+|---------|-------------|------|--------------|
+| **mysql** | MySQL 8.0 database | 3306 | `mysqladmin ping` |
+| **redis** | Redis 7 cache | 6379 | `redis-cli ping` |
+| **backend** | FastAPI application | 8000 | `/health` endpoint |
+
+**Data Persistence:**
+- MySQL data: `jerp_mysql_data` volume
+- Redis data: `jerp_redis_data` volume
+
+### Manual Installation (Without Docker)
+
+If you prefer to run without Docker:
+
+```bash
 # Install Python dependencies
 cd backend
 pip install -r requirements.txt
 
-# Run the application
+# Set environment variables
+# Configure MySQL and Redis connections in .env
+
+# Run migrations
+alembic upgrade head
+
+# Initialize database
+python manage.py db:init
+
+# Start application
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 

@@ -1,7 +1,7 @@
 """Add compliance tables
 
-Revision ID: 001_add_compliance
-Revises: 
+Revision ID: 002_add_compliance
+Revises: 001_initial_schema
 Create Date: 2024-02-03 01:59:00.000000
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '001_add_compliance'
-down_revision = None
+revision = '002_add_compliance'
+down_revision = '001_initial_schema'
 branch_labels = None
 depends_on = None
 

@@ -8,10 +8,14 @@ from alembic import context
 
 # Import Base and models
 from app.core.database import Base
-from app.models import user, role, audit_log, compliance
+from app.core.config import settings
+from app.models import user, role, audit_log, compliance_violation
 
 # Alembic Config object
 config = context.config
+
+# Set database URL from settings
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:
