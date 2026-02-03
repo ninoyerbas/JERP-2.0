@@ -71,3 +71,10 @@ build/
 
 # Alembic
 alembic/versions/*.pyc
+
+# Docker volumes
+mysql_data/
+redis_data/
+
+# MyPy
+.mypy_cache/
