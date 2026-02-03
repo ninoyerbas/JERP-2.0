@@ -73,6 +73,37 @@ JERP 2.0 includes a comprehensive compliance framework that automatically monito
 
 ## 🚀 Quick Start
 
+### Windows 11 (Recommended - Using Docker)
+
+```powershell
+# Clone the repository
+git clone https://github.com/ninoyerbas/JERP-2.0.git
+cd JERP-2.0
+
+# Configure environment
+Copy-Item .env.example .env
+# Edit .env with your settings (use notepad or your preferred editor)
+
+# Start with Docker Compose (requires Docker Desktop)
+.\scripts\start-windows.ps1
+
+# Or manually:
+docker-compose up -d
+```
+
+**Default Superuser:**
+- Email: `admin@jerp.local`
+- Password: `Admin123!ChangeMe` (⚠️ Change after first login!)
+
+Access the application:
+- API: `http://localhost:8000`
+- API Docs: `http://localhost:8000/api/v1/docs`
+- Health Check: `http://localhost:8000/health`
+
+See [Installation Guide](docs/INSTALLATION.md) for detailed Windows setup.
+
+### Linux/Mac (Local Development)
+
 ```bash
 # Clone the repository
 git clone https://github.com/ninoyerbas/JERP-2.0.git
@@ -85,6 +116,12 @@ cp .env.example .env
 # Install Python dependencies
 cd backend
 pip install -r requirements.txt
+
+# Run database migrations
+alembic upgrade head
+
+# Initialize database
+python scripts/init_db.py
 
 # Run the application
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

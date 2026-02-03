@@ -35,6 +35,9 @@ COPY --from=builder /root/.local /usr/local
 
 # Copy application code
 COPY backend/app /app/app
+COPY backend/alembic /app/alembic
+COPY backend/alembic.ini /app/alembic.ini
+COPY backend/scripts /app/scripts
 
 # Expose port
 EXPOSE 8000

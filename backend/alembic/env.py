@@ -5,13 +5,22 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
+import sys
+from pathlib import Path
+
+# Add backend to path
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 # Import Base and models
+from app.core.config import settings
 from app.core.database import Base
-from app.models import user, role, audit_log, compliance
+from app.models import *  # Import all models
 
 # Alembic Config object
 config = context.config
+
+# Set DATABASE_URL from settings
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:
