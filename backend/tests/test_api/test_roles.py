@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models.role import Role, Permission
+from app.models.user import User
 
 
 def test_list_roles(client: TestClient, auth_headers: dict):
