@@ -33,6 +33,14 @@ from app.models.payroll import (
     PayPeriodType,
     PayslipStatus,
 )
+from app.models.finance import (
+    Account,
+    JournalEntry,
+    JournalEntryLine,
+    AccountType,
+    AccountSubtype,
+    JournalEntryStatus,
+)
 
 __all__ = [
     "User",
@@ -62,4 +70,10 @@ __all__ = [
     "PayPeriodStatus",
     "PayPeriodType",
     "PayslipStatus",
+    "Account",
+    "JournalEntry",
+    "JournalEntryLine",
+    "AccountType",
+    "AccountSubtype",
+    "JournalEntryStatus",
 ]
