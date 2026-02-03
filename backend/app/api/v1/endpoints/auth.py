@@ -26,7 +26,7 @@ from app.schemas.auth import (
     ChangePasswordRequest,
 )
 from app.schemas.user import UserResponse, UserUpdate
-from app.api.v1.dependencies import get_current_active_user, get_db
+from app.api.v1.dependencies import get_current_active_user
 from app.api.v1.exceptions import UnauthorizedException, ConflictException, BadRequestException
 
 
