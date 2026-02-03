@@ -223,7 +223,7 @@ async def get_employee_payslip_history(
     return payslips
 
 
-@router.get("/payslips/non-compliant", response_model=List[PayslipResponse])
+@router.get("/payslips/employee/{employee_id}", response_model=List[PayslipResponse])
 async def list_non_compliant_payslips(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=100, description="Maximum number of records to return"),
