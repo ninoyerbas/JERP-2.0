@@ -14,6 +14,15 @@ from app.models.compliance_violation import (
     ViolationStatus,
     RegulationType,
 )
+from app.models.hr import (
+    Employee,
+    Department,
+    Position,
+    EmployeeDocument,
+    EmploymentStatus,
+    EmploymentType,
+    DocumentType,
+)
 
 __all__ = [
     "User",
@@ -28,4 +37,11 @@ __all__ = [
     "ViolationSeverity",
     "ViolationStatus",
     "RegulationType",
+    "Employee",
+    "Department",
+    "Position",
+    "EmployeeDocument",
+    "EmploymentStatus",
+    "EmploymentType",
+    "DocumentType",
 ]

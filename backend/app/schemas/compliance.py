@@ -26,8 +26,8 @@ class ComplianceViolationBase(BaseModel):
     description: str
     entity_type: str = Field(..., max_length=100)
     entity_id: Optional[int] = None
-    financial_impact: Optional[Decimal] = Field(None, decimal_places=2)
-    metadata: Optional[Dict[str, Any]] = None
+    financial_impact: Optional[Decimal] = None
+    additional_metadata: Optional[Dict[str, Any]] = None
 
 
 class ComplianceViolationCreate(ComplianceViolationBase):
@@ -42,8 +42,8 @@ class ComplianceViolationUpdate(BaseModel):
     status: Optional[ViolationStatus] = None
     assigned_to: Optional[int] = None
     resolution_notes: Optional[str] = None
-    financial_impact: Optional[Decimal] = Field(None, decimal_places=2)
-    metadata: Optional[Dict[str, Any]] = None
+    financial_impact: Optional[Decimal] = None
+    additional_metadata: Optional[Dict[str, Any]] = None
 
 
 class ComplianceViolationResolve(BaseModel):
