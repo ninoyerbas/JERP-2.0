@@ -24,7 +24,6 @@ class Role(Base):
     name = Column(String(100), unique=True, index=True, nullable=False)
     description = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
-    
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
@@ -43,7 +42,6 @@ class Permission(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     module = Column(String(100), nullable=False)
-    
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     
     roles = relationship("Role", secondary=role_permissions, back_populates="permissions")
