@@ -14,6 +14,11 @@ from app.models.compliance_violation import (
     ViolationStatus,
     RegulationType,
 )
+from app.models.hr import Employee, Department, Position, EmployeeDocument
+from app.models.payroll import PayrollPeriod, Payslip
+from app.models.finance import ChartOfAccounts, JournalEntry, JournalEntryLine
+from app.models.time_attendance import Timesheet, TimesheetEntry, BreakEntry
+from app.models.leave import LeavePolicy, LeaveBalance, LeaveRequest
 
 __all__ = [
     "User",
@@ -28,4 +33,19 @@ __all__ = [
     "ViolationSeverity",
     "ViolationStatus",
     "RegulationType",
+    "Employee",
+    "Department",
+    "Position",
+    "EmployeeDocument",
+    "PayrollPeriod",
+    "Payslip",
+    "ChartOfAccounts",
+    "JournalEntry",
+    "JournalEntryLine",
+    "Timesheet",
+    "TimesheetEntry",
+    "BreakEntry",
+    "LeavePolicy",
+    "LeaveBalance",
+    "LeaveRequest",
 ]
