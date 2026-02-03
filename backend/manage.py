@@ -67,8 +67,22 @@ def db_migrate(message):
     click.echo(f"Creating migration: {message}")
     
     try:
-        os.system(f'cd backend && alembic revision --autogenerate -m "{message}"')
-        click.echo(click.style("✓ Migration created successfully!", fg="green"))
+        import subprocess
+        result = subprocess.run(
+            ["alembic", "revision", "--autogenerate", "-m", message],
+            cwd="backend",
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            click.echo(click.style("✓ Migration created successfully!", fg="green"))
+            if result.stdout:
+                click.echo(result.stdout)
+        else:
+            click.echo(click.style(f"✗ Migration creation failed!", fg="red"))
+            if result.stderr:
+                click.echo(result.stderr)
+            sys.exit(1)
     except Exception as e:
         click.echo(click.style(f"✗ Migration creation failed: {str(e)}", fg="red"))
         sys.exit(1)
@@ -81,8 +95,22 @@ def db_upgrade(revision):
     click.echo(f"Upgrading database to {revision}...")
     
     try:
-        os.system(f"cd backend && alembic upgrade {revision}")
-        click.echo(click.style("✓ Database upgraded successfully!", fg="green"))
+        import subprocess
+        result = subprocess.run(
+            ["alembic", "upgrade", revision],
+            cwd="backend",
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            click.echo(click.style("✓ Database upgraded successfully!", fg="green"))
+            if result.stdout:
+                click.echo(result.stdout)
+        else:
+            click.echo(click.style(f"✗ Database upgrade failed!", fg="red"))
+            if result.stderr:
+                click.echo(result.stderr)
+            sys.exit(1)
     except Exception as e:
         click.echo(click.style(f"✗ Database upgrade failed: {str(e)}", fg="red"))
         sys.exit(1)
@@ -98,8 +126,22 @@ def db_downgrade(revision):
         click.confirm("You are in production mode. Are you sure you want to downgrade?", abort=True)
     
     try:
-        os.system(f"cd backend && alembic downgrade {revision}")
-        click.echo(click.style("✓ Database downgraded successfully!", fg="green"))
+        import subprocess
+        result = subprocess.run(
+            ["alembic", "downgrade", revision],
+            cwd="backend",
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            click.echo(click.style("✓ Database downgraded successfully!", fg="green"))
+            if result.stdout:
+                click.echo(result.stdout)
+        else:
+            click.echo(click.style(f"✗ Database downgrade failed!", fg="red"))
+            if result.stderr:
+                click.echo(result.stderr)
+            sys.exit(1)
     except Exception as e:
         click.echo(click.style(f"✗ Database downgrade failed: {str(e)}", fg="red"))
         sys.exit(1)
@@ -192,9 +234,27 @@ def db_status():
     click.echo("=" * 50)
     
     try:
-        os.system("cd backend && alembic current")
+        import subprocess
+        
+        click.echo("\nCurrent Revision:")
+        result = subprocess.run(
+            ["alembic", "current"],
+            cwd="backend",
+            capture_output=True,
+            text=True
+        )
+        if result.stdout:
+            click.echo(result.stdout)
+        
         click.echo("\nMigration History:")
-        os.system("cd backend && alembic history --verbose")
+        result = subprocess.run(
+            ["alembic", "history", "--verbose"],
+            cwd="backend",
+            capture_output=True,
+            text=True
+        )
+        if result.stdout:
+            click.echo(result.stdout)
     except Exception as e:
         click.echo(click.style(f"✗ Failed to get status: {str(e)}", fg="red"))
         sys.exit(1)
