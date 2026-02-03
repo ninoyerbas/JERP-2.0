@@ -24,6 +24,9 @@ from app.models.hr import (
     DocumentType,
 )
 from app.models.payroll import (
+    PayrollPeriod,
+    Payslip,
+    PayrollStatus,
     PayPeriod,
     Payslip,
     PayPeriodStatus,
@@ -51,6 +54,9 @@ __all__ = [
     "EmploymentStatus",
     "EmploymentType",
     "DocumentType",
+    "PayrollPeriod",
+    "Payslip",
+    "PayrollStatus",
     "PayPeriod",
     "Payslip",
     "PayPeriodStatus",
