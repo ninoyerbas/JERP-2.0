@@ -39,5 +39,5 @@ def init_db():
     Initialize database tables.
     Called on application startup.
     """
-    from app.models import user, role, audit_log  # noqa: F401
+    from app.models import user, role, audit_log, compliance_violation  # noqa: F401
     Base.metadata.create_all(bind=jerp_engine)
