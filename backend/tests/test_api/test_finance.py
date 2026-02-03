@@ -176,6 +176,100 @@ def test_get_nonexistent_account(client: TestClient, auth_headers: dict):
     assert response.status_code == 404
 
 
+def test_update_account(client: TestClient, auth_headers: dict, test_accounts: dict):
+    """Test updating an account"""
+    account_id = test_accounts["cash"].id
+    
+    response = client.put(
+        f"/api/v1/finance/accounts/{account_id}",
+        json={
+            "name": "Cash - Main Account",
+            "description": "Primary cash account"
+        },
+        headers=auth_headers
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Cash - Main Account"
+    assert data["description"] == "Primary cash account"
+
+
+def test_update_nonexistent_account(client: TestClient, auth_headers: dict):
+    """Test updating a non-existent account"""
+    response = client.put(
+        "/api/v1/finance/accounts/99999",
+        json={"name": "Updated Name"},
+        headers=auth_headers
+    )
+    
+    assert response.status_code == 404
+
+
+def test_delete_account_with_transactions(client: TestClient, auth_headers: dict, test_accounts: dict, db: Session, admin_user: User):
+    """Test that deleting an account with transactions fails"""
+    # Create a journal entry with the account
+    from app.services.finance_service import FinanceService
+    from app.schemas.finance import JournalEntryCreate, JournalEntryLineCreate
+    
+    service = FinanceService(db)
+    entry_data = JournalEntryCreate(
+        entry_date=date.today(),
+        description="Test entry",
+        lines=[
+            JournalEntryLineCreate(
+                account_id=test_accounts["cash"].id,
+                debit=Decimal("100"),
+                credit=Decimal("0")
+            ),
+            JournalEntryLineCreate(
+                account_id=test_accounts["capital"].id,
+                debit=Decimal("0"),
+                credit=Decimal("100")
+            )
+        ]
+    )
+    service.create_journal_entry(entry_data, admin_user.id)
+    
+    # Try to delete the account
+    response = client.delete(
+        f"/api/v1/finance/accounts/{test_accounts['cash'].id}",
+        headers=auth_headers
+    )
+    
+    assert response.status_code == 400
+    assert "existing transactions" in response.json()["detail"].lower()
+
+
+def test_delete_account_without_transactions(client: TestClient, auth_headers: dict, db: Session):
+    """Test deleting an account without transactions"""
+    # Create a new account without transactions
+    from app.models.finance import Account, AccountType, AccountSubtype
+    
+    account = Account(
+        account_number="9999",
+        name="Temporary Account",
+        account_type=AccountType.EXPENSE,
+        account_subtype=AccountSubtype.OPERATING_EXPENSE,
+        is_active=True
+    )
+    db.add(account)
+    db.commit()
+    db.refresh(account)
+    
+    # Delete it
+    response = client.delete(
+        f"/api/v1/finance/accounts/{account.id}",
+        headers=auth_headers
+    )
+    
+    assert response.status_code == 204
+    
+    # Verify it's deleted
+    deleted = db.query(Account).filter(Account.id == account.id).first()
+    assert deleted is None
+
+
 # Journal Entry Tests
 
 def test_create_journal_entry(client: TestClient, auth_headers: dict, test_accounts: dict):

@@ -73,6 +73,75 @@ async def get_account(
     return account
 
 
+@router.put("/accounts/{account_id}", response_model=AccountResponse)
+async def update_account(
+    account_id: int,
+    account_data: AccountUpdate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Update an existing account"""
+    account = db.query(Account).filter(Account.id == account_id).first()
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found"
+        )
+    
+    # Check if it's a system account
+    if account.is_system_account and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot modify system accounts"
+        )
+    
+    # Update fields
+    update_data = account_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(account, field, value)
+    
+    db.commit()
+    db.refresh(account)
+    return account
+
+
+@router.delete("/accounts/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_account(
+    account_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Delete an account (only if no transactions exist)"""
+    account = db.query(Account).filter(Account.id == account_id).first()
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found"
+        )
+    
+    # Check if it's a system account
+    if account.is_system_account:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot delete system accounts"
+        )
+    
+    # Check for existing transactions
+    from app.models.finance import JournalEntryLine
+    has_transactions = db.query(JournalEntryLine).filter(
+        JournalEntryLine.account_id == account_id
+    ).first() is not None
+    
+    if has_transactions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete account with existing transactions. Deactivate it instead."
+        )
+    
+    db.delete(account)
+    db.commit()
+
+
 # Journal Entry Endpoints
 
 @router.get("/journal-entries", response_model=List[JournalEntryResponse])
