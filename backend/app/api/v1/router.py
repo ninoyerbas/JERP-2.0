@@ -1,9 +1,11 @@
-"""API v1 Router"""
+"""
+JERP 2.0 - API Router
+Main router for all API endpoints
+"""
 from fastapi import APIRouter
+from app.api.v1.endpoints import compliance
 
 api_router = APIRouter()
 
-@api_router.get("/")
-async def root():
-    """API root endpoint"""
-    return {"message": "JERP 2.0 API v1"}
+# Include compliance endpoints
+api_router.include_router(compliance.router, prefix="/compliance", tags=["compliance"])
