@@ -10,7 +10,7 @@ from app.core.database import SessionLocal
 from app.core.security import decode_token, TokenData
 from app.models.user import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login/form")
 
 def get_db() -> Generator:
     """Database session dependency."""
