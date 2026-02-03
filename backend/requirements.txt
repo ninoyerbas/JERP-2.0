@@ -1,20 +1,20 @@
 # JERP 2.0 - Python Dependencies
 
 # Core Framework
-fastapi==0.104.1
+fastapi==0.109.1  # Fixed: Content-Type Header ReDoS (was 0.104.1)
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
 
 # Database
 sqlalchemy==2.0.23
-pymysql==1.1.0
-cryptography==41.0.7  # For PyMySQL
+pymysql==1.1.1  # Fixed: SQL Injection vulnerability (was 1.1.0)
+cryptography==42.0.4  # Fixed: NULL pointer dereference and Bleichenbacher timing oracle (was 41.0.7)
 
 # Authentication & Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
+python-multipart==0.0.22  # Fixed: Multiple vulnerabilities including arbitrary file write, DoS, ReDoS (was 0.0.6)
 
 # Utilities
 python-dateutil==2.8.2
