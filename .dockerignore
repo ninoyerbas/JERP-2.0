@@ -1,0 +1,55 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation
+*.md
+!backend/app/**/*.md
+
+# Environment files
+.env
+.env.example
+
+# Test files
+tests/
+backend/tests/
+*_test.py
+test_*.py
+
+# Temporary files
+*.log
+*.tmp
+tmp/
+temp/
+
+# Issues and docs
+issues/
+issue-*.md
+SOW.md
