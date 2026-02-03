@@ -1,4 +1,4 @@
-"""Initial schema - Users, Roles, Permissions, Audit Logs
+"""Initial schema - core tables
 
 Revision ID: 001_initial_schema
 Revises: 
@@ -7,7 +7,6 @@ Create Date: 2024-02-03 00:00:00.000000
 """
 from alembic import op
 import sqlalchemy as sa
-from datetime import datetime
 
 # revision identifiers, used by Alembic.
 revision = '001_initial_schema'
@@ -17,19 +16,18 @@ depends_on = None
 
 
 def upgrade() -> None:
-    """Create base tables for users, roles, permissions, and audit logs"""
+    """Create core tables: users, roles, permissions, role_permissions, audit_logs"""
     
-    # Create roles table first (referenced by users)
+    # Create roles table
     op.create_table(
         'roles',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('is_active', sa.Boolean(), nullable=False, server_default='1'),
-        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('name')
+        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.PrimaryKeyConstraint('id')
     )
     op.create_index('ix_roles_id', 'roles', ['id'])
     op.create_index('ix_roles_name', 'roles', ['name'], unique=True)
@@ -42,9 +40,8 @@ def upgrade() -> None:
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('module', sa.String(length=100), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('code')
+        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.PrimaryKeyConstraint('id')
     )
     op.create_index('ix_permissions_id', 'permissions', ['id'])
     op.create_index('ix_permissions_code', 'permissions', ['code'], unique=True)
@@ -69,12 +66,11 @@ def upgrade() -> None:
         sa.Column('is_active', sa.Boolean(), nullable=False, server_default='1'),
         sa.Column('is_superuser', sa.Boolean(), nullable=False, server_default='0'),
         sa.Column('role_id', sa.Integer(), nullable=True),
-        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
         sa.Column('last_login', sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('email')
+        sa.PrimaryKeyConstraint('id')
     )
     op.create_index('ix_users_id', 'users', ['id'])
     op.create_index('ix_users_email', 'users', ['email'], unique=True)
@@ -95,10 +91,9 @@ def upgrade() -> None:
         sa.Column('user_agent', sa.String(length=500), nullable=True),
         sa.Column('previous_hash', sa.String(length=64), nullable=True),
         sa.Column('current_hash', sa.String(length=64), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
+        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('current_hash')
+        sa.PrimaryKeyConstraint('id')
     )
     op.create_index('ix_audit_logs_id', 'audit_logs', ['id'])
     op.create_index('ix_audit_logs_action', 'audit_logs', ['action'])
@@ -110,9 +105,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Drop base tables"""
+    """Drop core tables"""
     
-    # Drop tables in reverse order of creation
+    # Drop indexes first, then tables
     op.drop_index('ix_audit_logs_created_at', table_name='audit_logs')
     op.drop_index('ix_audit_logs_current_hash', table_name='audit_logs')
     op.drop_index('ix_audit_logs_previous_hash', table_name='audit_logs')

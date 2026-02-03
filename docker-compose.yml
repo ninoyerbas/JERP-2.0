@@ -3,105 +3,89 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: jerp_mysql
+    container_name: jerp-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password_change_me}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-jerp}
       MYSQL_USER: ${MYSQL_USER:-jerp_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-jerp_password_change_me}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me_in_production}
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - jerp_network
+      - jerp-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_password_change_me}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   redis:
     image: redis:7-alpine
-    container_name: jerp_redis
+    container_name: jerp-redis
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - jerp_network
+      - jerp-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: jerp_backend
+    container_name: jerp-backend
     restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-jerp}
+      MYSQL_USER: ${MYSQL_USER:-jerp_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me_in_production}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change_me_super_secret_key_in_production}
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    networks:
+      - jerp-network
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
-    environment:
-      # Application
-      APP_NAME: ${APP_NAME:-JERP 2.0}
-      APP_ENV: ${APP_ENV:-development}
-      APP_DEBUG: ${APP_DEBUG:-true}
-      API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
-      
-      # CORS
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
-      
-      # MySQL Database
-      MYSQL_HOST: mysql
-      MYSQL_PORT: ${MYSQL_PORT:-3306}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-jerp}
-      MYSQL_USER: ${MYSQL_USER:-jerp_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-jerp_password_change_me}
-      
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      
-      # JWT Authentication
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-super_secret_key_change_in_production_min_32_chars}
-      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
-      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-30}
-      JWT_REFRESH_TOKEN_EXPIRE_DAYS: ${JWT_REFRESH_TOKEN_EXPIRE_DAYS:-7}
-      
-      # Initial Superuser
-      INITIAL_SUPERUSER_EMAIL: ${INITIAL_SUPERUSER_EMAIL:-admin@jerp.local}
-      INITIAL_SUPERUSER_PASSWORD: ${INITIAL_SUPERUSER_PASSWORD:-admin123}
-      INITIAL_SUPERUSER_NAME: ${INITIAL_SUPERUSER_NAME:-System Administrator}
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app/backend:ro
-    networks:
-      - jerp_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        sleep 10 &&
+        echo 'Running migrations...' &&
+        alembic upgrade head &&
+        echo 'Initializing database...' &&
+        python scripts/init_db.py &&
+        echo 'Starting application...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
 
 volumes:
   mysql_data:
-    name: jerp_mysql_data
+    driver: local
   redis_data:
-    name: jerp_redis_data
+    driver: local
 
 networks:
-  jerp_network:
-    name: jerp_network
+  jerp-network:
     driver: bridge

@@ -73,15 +73,36 @@ JERP 2.0 includes a comprehensive compliance framework that automatically monito
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Windows 11 (Recommended - Using Docker)
 
-- **Windows 11** (or Windows 10 with WSL 2)
-- **Docker Desktop for Windows** - [Download](https://www.docker.com/products/docker-desktop/)
-- **Git** - [Download](https://git-scm.com/download/win)
+```powershell
+# Clone the repository
+git clone https://github.com/ninoyerbas/JERP-2.0.git
+cd JERP-2.0
 
-### Installation
+# Configure environment
+Copy-Item .env.example .env
+# Edit .env with your settings (use notepad or your preferred editor)
 
-#### 1. Clone and Configure
+# Start with Docker Compose (requires Docker Desktop)
+.\scripts\start-windows.ps1
+
+# Or manually:
+docker-compose up -d
+```
+
+**Default Superuser:**
+- Email: `admin@jerp.local`
+- Password: `Admin123!ChangeMe` (⚠️ Change after first login!)
+
+Access the application:
+- API: `http://localhost:8000`
+- API Docs: `http://localhost:8000/api/v1/docs`
+- Health Check: `http://localhost:8000/health`
+
+See [Installation Guide](docs/INSTALLATION.md) for detailed Windows setup.
+
+### Linux/Mac (Local Development)
 
 ```bash
 git clone https://github.com/ninoyerbas/JERP-2.0.git
@@ -199,16 +220,13 @@ If you prefer to run without Docker:
 cd backend
 pip install -r requirements.txt
 
-# Set environment variables
-# Configure MySQL and Redis connections in .env
-
-# Run migrations
+# Run database migrations
 alembic upgrade head
 
 # Initialize database
-python manage.py db:init
+python scripts/init_db.py
 
-# Start application
+# Run the application
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 

@@ -1,357 +1,298 @@
 # JERP 2.0 - Installation Guide
 
-Complete installation guide for JERP 2.0 on Windows 11.
+## Windows 11 Installation
+
+This guide will help you install and set up JERP 2.0 on Windows 11 using Docker Desktop.
 
 ## Prerequisites
 
 ### Required Software
 
-1. **Windows 11**
-   - Any edition (Home, Pro, Enterprise)
-   - 64-bit version required
+1. **Windows 11** (64-bit)
+2. **Docker Desktop for Windows** (version 4.0 or higher)
+3. **PowerShell 5.1 or higher** (included with Windows 11)
+4. **Git for Windows** (optional, for cloning the repository)
 
-2. **Docker Desktop for Windows**
-   - Version 4.x or later
-   - Download: https://www.docker.com/products/docker-desktop/
-   - Requires WSL 2 backend
+### Hardware Requirements
 
-3. **Git for Windows**
-   - Download: https://git-scm.com/download/win
-   - Used to clone the repository
+**Recommended:**
+- AMD Ryzen 9 6900HX or equivalent (8 cores/16 threads)
+- 32GB DDR5 RAM
+- 1TB NVMe SSD
+- 10GB free disk space for Docker images
 
-### Recommended Software
+**Minimum:**
+- Dual-core processor with virtualization support
+- 8GB RAM
+- 20GB free disk space
 
-- **VS Code** - For development: https://code.visualstudio.com/
-- **Windows Terminal** - Better terminal experience: https://aka.ms/terminal
-- **MySQL Workbench** - Database management (optional): https://dev.mysql.com/downloads/workbench/
+## Step 1: Install Docker Desktop
 
-## Installation Steps
+1. Download Docker Desktop for Windows from [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
 
-### 1. Install Docker Desktop
-
-1. Download Docker Desktop from https://www.docker.com/products/docker-desktop/
 2. Run the installer and follow the installation wizard
-3. Enable WSL 2 when prompted
-4. Restart your computer if required
-5. Start Docker Desktop and wait for it to be ready
-6. Verify installation:
+
+3. Enable WSL 2 backend when prompted (recommended)
+
+4. Restart your computer when installation completes
+
+5. Launch Docker Desktop and wait for it to start
+
+6. Verify Docker is running:
    ```powershell
    docker --version
-   docker-compose --version
+   docker info
    ```
 
-### 2. Configure Docker Desktop
-
-1. Open Docker Desktop Settings (System Tray → Docker Icon → Settings)
-2. **Resources:**
-   - CPUs: Allocate at least 4 cores
-   - Memory: Allocate at least 8GB RAM
-   - Disk: Ensure at least 20GB available
-
-3. **Docker Engine:**
-   - Keep default settings (unless you have specific requirements)
-
-4. Apply & Restart Docker Desktop
-
-### 3. Clone the Repository
-
-Open PowerShell or Windows Terminal:
+## Step 2: Clone the Repository
 
 ```powershell
-# Clone the repository
+# Using Git
 git clone https://github.com/ninoyerbas/JERP-2.0.git
-
-# Navigate to the project directory
 cd JERP-2.0
+
+# Or download and extract the ZIP file from GitHub
 ```
 
-### 4. Configure Environment Variables
+## Step 3: Configure Environment
 
-1. Copy the example environment file:
+1. Create your `.env` file from the example:
    ```powershell
    Copy-Item .env.example .env
    ```
 
-2. Edit `.env` file with your preferred text editor (Notepad, VS Code, etc.):
+2. Edit `.env` with your preferred text editor (Notepad, VSCode, etc.):
    ```powershell
    notepad .env
-   # or
-   code .env
    ```
 
-3. **Important: Update these values:**
+3. **IMPORTANT:** Update these security-critical values:
+   - `MYSQL_ROOT_PASSWORD` - Strong password for MySQL root user
+   - `MYSQL_PASSWORD` - Strong password for application database user
+   - `JWT_SECRET_KEY` - Long random string for JWT token signing
+
+   Example secure values:
    ```env
-   # Change these passwords!
-   MYSQL_ROOT_PASSWORD=your_secure_root_password_here
-   MYSQL_PASSWORD=your_secure_password_here
-   JWT_SECRET_KEY=your_very_long_random_secret_key_at_least_32_characters
-   INITIAL_SUPERUSER_PASSWORD=your_admin_password_here
+   MYSQL_ROOT_PASSWORD=MyS3cur3R00tP@ssw0rd!2024
+   MYSQL_PASSWORD=MyS3cur3AppP@ssw0rd!2024
+   JWT_SECRET_KEY=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
    ```
 
-4. **Optional: Update these values:**
-   ```env
-   # Initial superuser credentials
-   INITIAL_SUPERUSER_EMAIL=your_email@example.com
-   INITIAL_SUPERUSER_NAME=Your Name
-   
-   # Application settings
-   APP_ENV=development  # or 'production'
-   APP_DEBUG=true       # false for production
-   ```
+## Step 4: Start JERP 2.0
 
-### 5. Start the Application
-
-#### Option A: Using PowerShell Scripts (Recommended)
+### Using PowerShell Script (Recommended)
 
 ```powershell
-# Start the application
-.\scripts\start.ps1
+.\scripts\start-windows.ps1
 ```
 
-This script will:
-- Check if Docker Desktop is running
-- Create `.env` from `.env.example` if needed
-- Build and start all containers
-- Display service URLs and credentials
+The script will:
+- Check Docker Desktop is running
+- Verify prerequisites
+- Start all services (MySQL, Redis, Backend)
+- Run database migrations
+- Initialize default data
+- Display access URLs
 
-#### Option B: Using Docker Compose Directly
+### Manual Start (Alternative)
 
 ```powershell
-# Build and start containers
-docker-compose up -d --build
-
-# View logs
-docker-compose logs -f
-
-# Stop with Ctrl+C
+docker-compose up -d
 ```
 
-### 6. Wait for Services to Initialize
+## Step 5: Verify Installation
 
-The first startup takes 2-3 minutes as it:
-- Downloads Docker images (MySQL, Redis)
-- Builds the backend application
-- Initializes the database
-- Runs migrations
-- Seeds initial data
-
-Monitor progress:
-```powershell
-# View all logs
-.\scripts\logs.ps1
-
-# Or view backend logs only
-.\scripts\logs.ps1 -Service backend
-```
-
-### 7. Verify Installation
-
-1. **Check services are running:**
+1. **Check service status:**
    ```powershell
    docker-compose ps
    ```
-   
-   All services should show as "Up" and "healthy":
-   - jerp_mysql
-   - jerp_redis
-   - jerp_backend
 
-2. **Test backend API:**
-   - Open browser: http://localhost:8000/health
-   - Should return JSON with `"status": "healthy"`
+   All services should show "Up" status.
 
-3. **Access API documentation:**
-   - Open browser: http://localhost:8000/api/v1/docs
-   - Interactive Swagger UI should load
+2. **View logs:**
+   ```powershell
+   # All services
+   docker-compose logs
 
-4. **Test login:**
-   - Use default credentials (from `.env`):
-     - Email: `admin@jerp.local`
-     - Password: `admin123` (or your custom password)
+   # Backend only
+   docker-compose logs -f backend
 
-## Post-Installation
+   # MySQL only
+   docker-compose logs -f mysql
+   ```
 
-### Access Services
+3. **Access the application:**
+   - API: http://localhost:8000
+   - API Documentation: http://localhost:8000/api/v1/docs
+   - Health Check: http://localhost:8000/health
 
-- **Backend API:** http://localhost:8000
-- **API Documentation (Swagger):** http://localhost:8000/api/v1/docs
-- **API Documentation (ReDoc):** http://localhost:8000/api/v1/redoc
-- **MySQL Database:** localhost:3306
-- **Redis Cache:** localhost:6379
+4. **Test health check:**
+   ```powershell
+   curl http://localhost:8000/health
+   ```
 
-### Default Credentials
+   Or open http://localhost:8000/health in your browser.
 
-**Superuser:**
-- Email: `admin@jerp.local` (configurable in `.env`)
-- Password: `admin123` (configurable in `.env`)
+## Step 6: First Login
 
-**MySQL Database:**
-- Host: `localhost` (or `mysql` from inside containers)
-- Port: `3306`
-- Database: `jerp`
-- User: `jerp_user`
-- Password: (from `.env` MYSQL_PASSWORD)
+### Default Superuser Account
 
-### Common Commands
+- **Email:** `admin@jerp.local`
+- **Password:** `Admin123!ChangeMe`
+
+**⚠️ CRITICAL:** Change this password immediately after first login!
+
+### Change Password via API
 
 ```powershell
-# View logs
-.\scripts\logs.ps1
+# Login to get access token
+$response = Invoke-RestMethod -Uri "http://localhost:8000/api/v1/auth/login" `
+  -Method POST `
+  -Headers @{"Content-Type"="application/json"} `
+  -Body '{"email":"admin@jerp.local","password":"Admin123!ChangeMe"}'
 
-# View specific service logs
-.\scripts\logs.ps1 -Service backend
+$token = $response.access_token
 
-# Stop application
-.\scripts\stop.ps1
+# Change password
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/auth/change-password" `
+  -Method POST `
+  -Headers @{
+    "Content-Type"="application/json"
+    "Authorization"="Bearer $token"
+  } `
+  -Body '{"old_password":"Admin123!ChangeMe","new_password":"YourNewSecurePassword123!"}'
+```
 
-# Restart application
-.\scripts\stop.ps1
-.\scripts\start.ps1
+## Managing JERP 2.0
 
-# Reset database (WARNING: Deletes all data!)
-.\scripts\reset.ps1
+### Stop Services
+
+```powershell
+docker-compose down
+```
+
+### Restart Services
+
+```powershell
+docker-compose restart
+```
+
+### Stop and Remove All Data
+
+**⚠️ WARNING:** This will delete all data!
+
+```powershell
+docker-compose down -v
+```
+
+### View Real-Time Logs
+
+```powershell
+docker-compose logs -f backend
+```
+
+### Update JERP 2.0
+
+```powershell
+# Stop services
+docker-compose down
+
+# Pull latest changes (if using Git)
+git pull
+
+# Rebuild images
+docker-compose build
+
+# Start services
+docker-compose up -d
 ```
 
 ## Troubleshooting
 
 ### Docker Desktop Not Starting
 
-**Issue:** Docker Desktop fails to start or shows "Docker is not running"
-
-**Solutions:**
-1. Ensure Windows Subsystem for Linux (WSL 2) is installed:
-   ```powershell
-   wsl --install
-   wsl --set-default-version 2
-   ```
-
-2. Enable Hyper-V and Containers features (PowerShell as Administrator):
-   ```powershell
-   Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
-   Enable-WindowsOptionalFeature -Online -FeatureName Containers -All
-   ```
-
-3. Restart Windows
+1. Ensure virtualization is enabled in BIOS
+2. Check Windows features: Hyper-V and WSL 2 should be enabled
+3. Restart Docker Desktop
+4. Check Docker Desktop logs
 
 ### Port Already in Use
 
-**Issue:** Error: "bind: address already in use"
+If ports 3306, 6379, or 8000 are in use:
 
-**Solutions:**
-1. Check what's using the port:
+1. Find what's using the port:
    ```powershell
    netstat -ano | findstr :8000
-   netstat -ano | findstr :3306
-   netstat -ano | findstr :6379
    ```
 
-2. Stop the conflicting service or change ports in `.env`:
-   ```env
-   MYSQL_PORT=3307  # Change from 3306
-   REDIS_PORT=6380  # Change from 6379
-   ```
+2. Either:
+   - Stop the conflicting service
+   - Or change port in `docker-compose.yml` and `.env`
 
-### Database Connection Failed
+### Database Connection Errors
 
-**Issue:** Backend can't connect to MySQL
-
-**Solutions:**
-1. Check MySQL is healthy:
+1. Check MySQL is running:
    ```powershell
    docker-compose ps mysql
    ```
 
 2. View MySQL logs:
    ```powershell
-   .\scripts\logs.ps1 -Service mysql
+   docker-compose logs mysql
    ```
 
-3. Restart services:
-   ```powershell
-   docker-compose restart mysql
-   docker-compose restart backend
-   ```
+3. Verify database credentials in `.env`
 
 ### Migration Errors
 
-**Issue:** Alembic migration fails
-
-**Solutions:**
-1. Check database is running:
-   ```powershell
-   docker-compose ps mysql
-   ```
-
-2. Run migrations manually:
-   ```powershell
-   docker-compose exec backend alembic upgrade head
-   ```
-
-3. Check migration history:
-   ```powershell
-   docker-compose exec backend alembic current
-   ```
-
-### Permission Denied Errors
-
-**Issue:** Cannot write to files or volumes
-
-**Solutions:**
-1. Run PowerShell as Administrator
-2. Ensure Docker Desktop has access to the drive:
-   - Docker Desktop Settings → Resources → File Sharing
-   - Add the project directory
-
-### Container Exits Immediately
-
-**Issue:** Backend container starts then exits
-
-**Solutions:**
-1. Check logs for errors:
-   ```powershell
-   .\scripts\logs.ps1 -Service backend
-   ```
-
-2. Common causes:
-   - Invalid Python code (syntax errors)
-   - Missing dependencies
-   - Database not ready
-
-3. Rebuild container:
-   ```powershell
-   docker-compose build backend --no-cache
-   docker-compose up -d backend
-   ```
-
-## Uninstallation
-
-To completely remove JERP 2.0:
+If migrations fail, you can run them manually:
 
 ```powershell
-# Stop and remove containers
+docker-compose exec backend alembic upgrade head
+```
+
+### Reset Database
+
+To completely reset the database:
+
+```powershell
+# Stop services
 docker-compose down
 
-# Remove volumes (WARNING: Deletes all data!)
-docker volume rm jerp_mysql_data
-docker volume rm jerp_redis_data
+# Remove volumes
+docker volume rm jerp-20_mysql_data
 
-# Remove images
-docker images | findstr jerp
-docker rmi <image_id>
-
-# Delete project directory
-cd ..
-Remove-Item -Recurse -Force JERP-2.0
+# Start fresh
+docker-compose up -d
 ```
+
+## Production Deployment
+
+For production deployment, use the production override:
+
+```powershell
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+**Production Checklist:**
+- [ ] Change all default passwords
+- [ ] Set `APP_ENV=production` in `.env`
+- [ ] Set `APP_DEBUG=false` in `.env`
+- [ ] Use strong, unique `JWT_SECRET_KEY`
+- [ ] Configure firewall rules
+- [ ] Set up SSL/TLS certificates
+- [ ] Configure backup strategy
+- [ ] Set up monitoring and logging
+- [ ] Review security settings
+
+## Getting Help
+
+- **Documentation:** See `docs/` directory
+- **Issues:** Report at https://github.com/ninoyerbas/JERP-2.0/issues
+- **API Docs:** http://localhost:8000/api/v1/docs
 
 ## Next Steps
 
-- Read [Development Guide](DEVELOPMENT.md) for development workflow
-- Read [Compliance Guide](COMPLIANCE_GUIDE.md) for compliance features
-- Explore API at http://localhost:8000/api/v1/docs
-
-## Support
-
-For issues or questions:
-- GitHub Issues: https://github.com/ninoyerbas/JERP-2.0/issues
-- Documentation: https://github.com/ninoyerbas/JERP-2.0/tree/main/docs
+- Read the [Development Guide](DEVELOPMENT.md)
+- Review the [Compliance Guide](COMPLIANCE_GUIDE.md)
+- Explore the [API Reference](API_REFERENCE.md)
