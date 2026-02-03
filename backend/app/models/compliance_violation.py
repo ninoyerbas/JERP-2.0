@@ -80,8 +80,8 @@ class ComplianceViolation(Base):
     audit_log_id = Column(Integer, ForeignKey("audit_logs.id"), nullable=True)
     audit_log = relationship("AuditLog", foreign_keys=[audit_log_id])
     
-    # Additional metadata
-    metadata = Column(JSON, nullable=True)
+    # Additional metadata (renamed from 'metadata' to avoid SQLAlchemy conflict)
+    additional_metadata = Column(JSON, nullable=True)
 
     def __repr__(self):
         return f"<ComplianceViolation(id={self.id}, type='{self.violation_type}', severity='{self.severity}')>"
