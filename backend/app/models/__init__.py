@@ -23,6 +23,11 @@ from app.models.hr import (
     EmploymentType,
     DocumentType,
 )
+from app.models.payroll import (
+    PayrollPeriod,
+    Payslip,
+    PayrollStatus,
+)
 
 __all__ = [
     "User",
@@ -44,4 +49,7 @@ __all__ = [
     "EmploymentStatus",
     "EmploymentType",
     "DocumentType",
+    "PayrollPeriod",
+    "Payslip",
+    "PayrollStatus",
 ]
